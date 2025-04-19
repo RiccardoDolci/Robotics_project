@@ -104,7 +104,7 @@ private:
                 v_average = 0;
                 count = 0;
                 current_sector = 2;
-                ROS_INFO("Entrato nel settore 1");
+                ROS_INFO("Entrato nel settore 2");
             }
         }
         // Settore 2
@@ -114,7 +114,7 @@ private:
                 v_average = 0;
                 count = 0;
                 current_sector = 3;
-                ROS_INFO("Entrato nel settore 2");
+                ROS_INFO("Entrato nel settore 3");
             }
         }
         // Settore 3
@@ -124,7 +124,7 @@ private:
                 v_average = 0;
                 count = 0;
                 current_sector = 1;
-                ROS_INFO("Entrato nel settore 3");
+                ROS_INFO("Entrato nel settore 1");
             }
         }
 
