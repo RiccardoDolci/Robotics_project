@@ -1,6 +1,9 @@
 #include "ros/ros.h"
 #include "sensor_msgs/NavSatFix.h"
 #include "first_project/custom.h"
+#include "geometry_msgs/PointStamped.h"
+#include <cmath>
+#include <deque>
 
 class SectorTimer {
 public:
@@ -138,3 +141,10 @@ private:
     }
 };
 
+
+int main(int argc, char** argv) {
+    ros::init(argc, argv, "sector_times");
+    SectorTimer sector_timer;
+    ros::spin();
+    return 0;
+}

@@ -14,7 +14,7 @@ public:
         private_nh.param("steering_factor", steering_factor_, 32.0);
 
         x_ = y_ = 0.0;
-        theta_=M_PI/2;
+        theta_= M_PI / 2; // Inizializza theta a 90 gradi in radianti
         
         last_time_ = ros::Time::now();
 
@@ -36,7 +36,7 @@ private:
     void speedsteerCallback(const geometry_msgs::PointStamped::ConstPtr& msg) {
          ROS_INFO("Callback attivato! steer: %f, speed: %f", msg->point.x, msg->point.y);
 
-        double steer_deg = msg->point.x+7.2;  // L'angolo di sterzata in gradi (campo x)
+        double steer_deg = msg->point.x + 7.2;  // L'angolo di sterzata in gradi (campo x)
         double v_kmh = msg->point.y;      // La velocità in km/h (campo y)
 
 
