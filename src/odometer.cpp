@@ -11,7 +11,7 @@ public:
     BicycleOdometryNode() {
         ros::NodeHandle private_nh("~");
         private_nh.param("wheelbase", wheelbase_, 1.765);
-        private_nh.param("steering_factor", steering_factor_, 92.0);
+        private_nh.param("steering_factor", steering_factor_, 32.0);
 
         x_ = y_ = 0.0;
         theta_=M_PI/2;
@@ -49,16 +49,38 @@ private:
         last_time_ = current_time;
 
         // Calcolo della velocità angolare
-        //double omega = vf*sin(alpha)/wheelbase_;
-        double omega = (v / wheelbase_) * tan(alpha);
-        //double v = omega * wheelbase_/tan(alpha);
+
+        double b = 1.3;
+
+        double R = wheelbase_/tan(alpha) + b;
+
+        double omega = v/R;
+        
+        //double omega = (v / wheelbase_) * tan(alpha);
+
+        const double EPSILON = 1e-6; // Tolleranza per considerare omega ≈ 0
+
+        if (std::abs(omega) < EPSILON) {
+        // Integrazione con RK2
+        double theta_mid = theta_ + (omega * dt) / 2.0;
+        x_ += v * dt * std::cos(theta_mid);
+        y_ += v * dt * std::sin(theta_mid);
+        theta_ += omega * dt;
+        } else {
+        // Integrazione esatta del modello di unicycle
+        double theta_new = theta_ + omega * dt;
+        x_ += (v / omega) * (std::sin(theta_new) - std::sin(theta_));
+        y_ += -(v / omega) * (std::cos(theta_new) - std::cos(theta_));
+        theta_ = theta_new;
+        }
+        
 
         // Calcolo posizione con RK2 (orientamento medio)
-        double theta_mid = theta_ +  (omega * dt)/2;
+        //double theta_mid = theta_ +  (omega * dt)/2;
 
-        x_ += v * dt * cos(theta_mid);
-        y_ += v * dt * sin(theta_mid);
-        theta_ += omega * dt;
+        //x_ += v * dt * cos(theta_mid);
+        //y_ += v * dt * sin(theta_mid);
+        //theta_ += omega * dt;
 
 
         geometry_msgs::Quaternion odom_quat = tf::createQuaternionMsgFromYaw(theta_);
@@ -74,7 +96,7 @@ private:
         odom.pose.pose.orientation = odom_quat;
 
         odom.twist.twist.linear.x = v;
-        //odom.twist.twist.angular.z = (v / wheelbase_) * tan(alpha);
+        
         odom.twist.twist.angular.z = omega ;
 
         odom_pub_.publish(odom);
