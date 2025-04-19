@@ -36,7 +36,7 @@ private:
     void speedsteerCallback(const geometry_msgs::PointStamped::ConstPtr& msg) {
          ROS_INFO("Callback attivato! steer: %f, speed: %f", msg->point.x, msg->point.y);
 
-        double steer_deg = msg->point.x;  // L'angolo di sterzata in gradi (campo x)
+        double steer_deg = msg->point.x+7.2;  // L'angolo di sterzata in gradi (campo x)
         double v_kmh = msg->point.y;      // La velocità in km/h (campo y)
 
 
@@ -59,7 +59,7 @@ private:
         //double omega = (v / wheelbase_) * tan(alpha);
 
         const double EPSILON = 1e-6; // Tolleranza per considerare omega ≈ 0
-
+        
         if (std::abs(omega) < EPSILON) {
         // Integrazione con RK2
         double theta_mid = theta_ + (omega * dt) / 2.0;
