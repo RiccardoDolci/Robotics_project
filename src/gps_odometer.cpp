@@ -14,6 +14,11 @@ public:
 
         private_n.param("semi_major_axis", a, 6378137.0);
         private_n.param("semi_minor_axis", b, 6356752.0);
+
+        
+
+        max_distance_threshold_ = 0.01;
+        window_size_ = 15;
     }
 
 private:
@@ -30,10 +35,57 @@ private:
     double lat_r, longit_r;
     double x_last, y_last, z_last;
 
+    double max_distance_threshold_;
+    int window_size_;
+    std::deque<std::pair<double, double>> valid_points_; // lat, lon
+
+    //media mobile a 5 punti
+
+    void addValidPoint(double lat, double lon)
+    {
+        if (valid_points_.size() >= window_size_) {
+            valid_points_.pop_front();
+        }
+        valid_points_.emplace_back(lat, lon);
+    }
+
+    std::pair<double, double> computeAverage()
+    {
+        double sum_lat = 0.0, sum_lon = 0.0;
+        for (const auto& pt : valid_points_) {
+            sum_lat += pt.first;
+            sum_lon += pt.second;
+        }
+        int n = valid_points_.size();
+        return { sum_lat / n, sum_lon / n };
+    }
+
+    
+    
+
     void callback(const sensor_msgs::NavSatFix::ConstPtr& msg) {
         double lat = msg->latitude * M_PI / 180.0;
         double longit = msg->longitude * M_PI / 180.0;
         double h = msg->altitude;
+
+        if (valid_points_.empty()) {
+            addValidPoint(lat, longit);
+            
+            
+        }
+
+        auto last = valid_points_.back();
+
+        if (abs(lat - last.first) > max_distance_threshold_ || abs(longit - last.second) > max_distance_threshold_){
+            ROS_WARN("GPS outlier detected . Using average fallback.");
+            auto avg = computeAverage();
+            lat = avg.first;
+            longit = avg.second;
+            
+        } else {
+            addValidPoint(lat, longit);
+            
+        }
 
         double e_squared = 1 - (b * b) / (a * a);
         double N = a / sqrt(1 - e_squared * sin(lat) * sin(lat));
