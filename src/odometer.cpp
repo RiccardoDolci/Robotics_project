@@ -1,4 +1,3 @@
-// bicycle_odometry_node.cpp
 #include <ros/ros.h>
 #include <std_msgs/Float32MultiArray.h>
 #include <nav_msgs/Odometry.h>
@@ -8,15 +7,10 @@
 
 class BicycleOdometryNode {
 public:
-    BicycleOdometryNode() {
+    BicycleOdometryNode() : x_(0.0), y_(0.0), theta_(84 * M_PI / 180.0), initialized_(false) {
         ros::NodeHandle private_nh("~");
         private_nh.param("wheelbase", wheelbase_, 1.765);
         private_nh.param("steering_factor", steering_factor_, 32.0);
-
-        x_ = y_ = 0.0;
-        theta_= M_PI / 2; // Inizializza theta a 90 gradi in radianti
-        
-        last_time_ = ros::Time::now();
 
         speedsteer_sub_ = nh_.subscribe("/speedsteer", 1, &BicycleOdometryNode::speedsteerCallback, this);
         odom_pub_ = nh_.advertise<nav_msgs::Odometry>("/odom", 1);
@@ -32,56 +26,45 @@ private:
     double steering_factor_;
     double x_, y_, theta_;
     ros::Time last_time_;
+    bool initialized_;
 
     void speedsteerCallback(const geometry_msgs::PointStamped::ConstPtr& msg) {
-         ROS_INFO("Callback attivato! steer: %f, speed: %f", msg->point.x, msg->point.y);
+        //ROS_INFO("Callback attivato! steer: %f, speed: %f", msg->point.x, msg->point.y);
 
-        double steer_deg = msg->point.x + 7.2;  // L'angolo di sterzata in gradi (campo x)
-        double v_kmh = msg->point.y;      // La velocità in km/h (campo y)
+        if (!initialized_) {
+            last_time_ = msg->header.stamp;
+            initialized_ = true;
+            return;
+        }
 
+        double steer_deg = msg->point.x + 7.2;  // angolo di sterzo in gradi
+        double v_kmh = msg->point.y;           // velocità in km/h
 
-        
-        double v = v_kmh / 3.6;  // Conversione km/h → m/s
-        double alpha = (steer_deg / steering_factor_) * M_PI / 180.0;  // angolo di sterzo in radianti
+        double v = v_kmh / 3.6;  // km/h → m/s
+        double alpha = (steer_deg / steering_factor_) * M_PI / 180.0;
 
-        ros::Time current_time = ros::Time::now();
+        ros::Time current_time = msg->header.stamp;
         double dt = (current_time - last_time_).toSec();
         last_time_ = current_time;
 
-        // Calcolo della velocità angolare
+        double b = 1.3;  // offset laterale
+        double R = wheelbase_ / tan(alpha) + b;
+        double omega = v / R;
 
-        double b = 1.3;
-
-        double R = wheelbase_/tan(alpha) + b;
-
-        double omega = v/R;
-        
-        //double omega = (v / wheelbase_) * tan(alpha);
-
-        const double EPSILON = 1e-6; // Tolleranza per considerare omega ≈ 0
-        
+        const double EPSILON = 1e-11;
         if (std::abs(omega) < EPSILON) {
-        // Integrazione con RK2
-        double theta_mid = theta_ + (omega * dt) / 2.0;
-        x_ += v * dt * std::cos(theta_mid);
-        y_ += v * dt * std::sin(theta_mid);
-        theta_ += omega * dt;
+            ROS_INFO("Runge-Kutta");
+            double theta_mid = theta_ + (omega * dt) / 2.0;
+            x_ += v * dt * std::cos(theta_mid);
+            y_ += v * dt * std::sin(theta_mid);
+            theta_ += omega * dt;
         } else {
-        // Integrazione esatta del modello di unicycle
-        double theta_new = theta_ + omega * dt;
-        x_ += (v / omega) * (std::sin(theta_new) - std::sin(theta_));
-        y_ += -(v / omega) * (std::cos(theta_new) - std::cos(theta_));
-        theta_ = theta_new;
+            ROS_INFO("Correct Integration");
+            double theta_new = theta_ + omega * dt;
+            x_ += (v / omega) * (std::sin(theta_new) - std::sin(theta_));
+            y_ += -(v / omega) * (std::cos(theta_new) - std::cos(theta_));
+            theta_ = theta_new;
         }
-        
-
-        // Calcolo posizione con RK2 (orientamento medio)
-        //double theta_mid = theta_ +  (omega * dt)/2;
-
-        //x_ += v * dt * cos(theta_mid);
-        //y_ += v * dt * sin(theta_mid);
-        //theta_ += omega * dt;
-
 
         geometry_msgs::Quaternion odom_quat = tf::createQuaternionMsgFromYaw(theta_);
 
@@ -89,15 +72,12 @@ private:
         odom.header.stamp = current_time;
         odom.header.frame_id = "world";
         odom.child_frame_id = "vehicle";
-
         odom.pose.pose.position.x = x_;
         odom.pose.pose.position.y = y_;
         odom.pose.pose.position.z = 0.0;
         odom.pose.pose.orientation = odom_quat;
-
         odom.twist.twist.linear.x = v;
-        
-        odom.twist.twist.angular.z = omega ;
+        odom.twist.twist.angular.z = omega;
 
         odom_pub_.publish(odom);
 
@@ -105,7 +85,6 @@ private:
         odom_tf.header.stamp = current_time;
         odom_tf.header.frame_id = "world";
         odom_tf.child_frame_id = "vehicle";
-
         odom_tf.transform.translation.x = x_;
         odom_tf.transform.translation.y = y_;
         odom_tf.transform.translation.z = 0.0;
@@ -123,7 +102,3 @@ int main(int argc, char** argv) {
     ros::spin();
     return 0;
 }
-
-
-
-

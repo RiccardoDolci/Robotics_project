@@ -21,8 +21,6 @@ public:
         private_n.param("sector3_lat", sec3_lat , 45.616042);
         private_n.param("sector3_longit", sec3_longit, 9.280767);
 
-        last_time = ros::Time::now();
-
         max_distance_threshold_ = 1;
         window_size_ = 5;
     }
@@ -75,12 +73,10 @@ private:
     void gpsCallback(const sensor_msgs::NavSatFix::ConstPtr& msg) {
         double lat = msg->latitude;
         double longit = msg->longitude;
-        ros::Time now = ros::Time::now();
+        ros::Time now = msg->header.stamp;
 
         if (valid_points_.empty()) {
             addValidPoint(lat, longit);
-            
-            
         }
 
         auto last = valid_points_.back();
@@ -89,11 +85,9 @@ private:
             ROS_WARN("GPS outlier detected . Using average fallback.");
             auto avg = computeAverage();
             lat = avg.first;
-            longit = avg.second;
-            
+            longit = avg.second;            
         } else {
             addValidPoint(lat, longit);
-            
         }
         
         

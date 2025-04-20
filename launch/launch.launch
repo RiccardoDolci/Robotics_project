@@ -9,6 +9,6 @@
     <node pkg="first_project" type="sector_times" name="sector_times" output="screen" />
 
     <!-- RViz (opzionale: specifica il file .rviz se lo hai) -->
-  <!--  <node pkg="rviz" type="rviz" name="rviz" args="-d $(find first_project)/config/tf_odom_config.rviz" output="screen" /> -->
+    <node pkg="rviz" type="rviz" name="rviz" args="-d $(find first_project)/config/tf_odom_config.rviz" output="screen" />
 </launch>
 

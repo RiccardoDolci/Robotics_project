@@ -7,12 +7,11 @@ Panels:
         - /Global Options1
         - /Status1
         - /Grid1
-        - /TF1
-        - /Odometry1
         - /Odometry1/Shape1
-        - /Odometry2
         - /Odometry2/Shape1
         - /Odometry2/Covariance1
+        - /TF1
+        - /TF1/Frames1
       Splitter Ratio: 0.5
     Tree Height: 548
   - Class: rviz/Selection
@@ -41,7 +40,7 @@ Visualization Manager:
   Class: ""
   Displays:
     - Alpha: 0.5
-      Cell Size: 100
+      Cell Size: 150
       Class: rviz/Grid
       Color: 160; 160; 164
       Enabled: true
@@ -55,25 +54,8 @@ Visualization Manager:
         Y: 0
         Z: 0
       Plane: XY
-      Plane Cell Count: 15
-      Reference Frame: <Fixed Frame>
-      Value: true
-    - Class: rviz/TF
-      Enabled: true
-      Filter (blacklist): ""
-      Filter (whitelist): ""
-      Frame Timeout: 15
-      Frames:
-        All Enabled: true
-      Marker Alpha: 1
-      Marker Scale: 500
-      Name: TF
-      Show Arrows: true
-      Show Axes: true
-      Show Names: true
-      Tree:
-        {}
-      Update Interval: 0
+      Plane Cell Count: 60
+      Reference Frame: world
       Value: true
     - Angle Tolerance: 0.10000000149011612
       Class: rviz/Odometry
@@ -102,10 +84,10 @@ Visualization Manager:
         Axes Length: 1
         Axes Radius: 0.10000000149011612
         Color: 255; 0; 0
-        Head Length: 0.30000001192092896
-        Head Radius: 0.10000000149011612
-        Shaft Length: 1
-        Shaft Radius: 0.05000000074505806
+        Head Length: 30
+        Head Radius: 30
+        Shaft Length: 30
+        Shaft Radius: 30
         Value: Arrow
       Topic: /gps_odom
       Unreliable: false
@@ -137,13 +119,37 @@ Visualization Manager:
         Axes Length: 1
         Axes Radius: 0.10000000149011612
         Color: 0; 0; 255
-        Head Length: 0.30000001192092896
-        Head Radius: 0.10000000149011612
-        Shaft Length: 1
-        Shaft Radius: 0.05000000074505806
+        Head Length: 30
+        Head Radius: 30
+        Shaft Length: 30
+        Shaft Radius: 30
         Value: Arrow
       Topic: /odom
       Unreliable: false
+      Value: true
+    - Class: rviz/TF
+      Enabled: true
+      Filter (blacklist): ""
+      Filter (whitelist): ""
+      Frame Timeout: 15
+      Frames:
+        All Enabled: true
+        vehicle:
+          Value: true
+        world:
+          Value: true
+      Marker Alpha: 1
+      Marker Scale: 1500
+      Name: TF
+      Show Arrows: true
+      Show Axes: true
+      Show Names: true
+      Tree:
+        vehicle:
+          {}
+        world:
+          {}
+      Update Interval: 0
       Value: true
   Enabled: true
   Global Options:
@@ -172,7 +178,7 @@ Visualization Manager:
   Value: true
   Views:
     Current:
-      Angle: 0
+      Angle: -2.6170164346694946e-07
       Class: rviz/TopDownOrtho
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
@@ -182,10 +188,10 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Scale: 0.23374728858470917
+      Scale: 0.08080974966287613
       Target Frame: <Fixed Frame>
-      X: 5.000001430511475
-      Y: 4.999999523162842
+      X: 136.22691345214844
+      Y: -335.739501953125
     Saved: ~
 Window Geometry:
   Displays:
@@ -203,5 +209,5 @@ Window Geometry:
   Views:
     collapsed: false
   Width: 1200
-  X: 73
+  X: 0
   Y: 0

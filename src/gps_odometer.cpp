@@ -125,7 +125,7 @@ private:
             gps_quat = tf::createQuaternionMsgFromYaw(0.0);
         }
 
-        ros::Time current_time = ros::Time::now();
+        ros::Time current_time = msg->header.stamp;
 
         // --- TF transform ---
         geometry_msgs::TransformStamped odom_tf;
